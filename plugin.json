@@ -1,8 +1,8 @@
 {
-	"id": "nodebb-plugin-quickstart",
-	"name": "Quickstart Plugin for NodeBB",
-	"description": "A starter kit for quickly creating NodeBB plugins",
-	"url": "https://github.com/NodeBB/nodebb-plugin-quickstart",
+	"id": "nodebb-plugin-group-gallery",
+	"name": "Group Galleries",
+	"description": "Exposes photo uploading capability for groups, and introduces a custom widget for placement into group pages",
+	"url": "https://github.com/NodeBB/nodebb-plugin-group-gallery",
 	"library": "./library.js",
 	"hooks": [
 		{

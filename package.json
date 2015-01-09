@@ -1,25 +1,26 @@
 {
-  "name": "nodebb-plugin-quickstart",
+  "name": "nodebb-plugin-group-gallery",
   "version": "0.1.1",
   "description": "A starter kit for quickly creating NodeBB plugins",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/psychobunny/nodebb-plugin-quickstart"
+    "url": "https://github.com/nodebb/nodebb-plugin-group-gallery"
   },
   "keywords": [
     "nodebb",
     "plugin",
-    "quickstart",
-    "shell"
+    "gallery",
+    "photos",
+    "upload"
   ],
   "author": {
-    "name": "psychobunny",
-    "email": "psycho.bunny@hotmail.com"
+    "name": "Erik Schamper",
+    "email": "erikschamper@outlook.com"
   },
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/psychobunny/nodebb-plugin-quickstart/issues"
+    "url": "https://github.com/nodebb/nodebb-plugin-group-gallery/issues"
   },
   "readmeFilename": "README.md"
 }
