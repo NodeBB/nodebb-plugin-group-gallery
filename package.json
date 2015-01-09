@@ -1,7 +1,7 @@
 {
   "name": "nodebb-plugin-group-gallery",
   "version": "0.1.1",
-  "description": "A starter kit for quickly creating NodeBB plugins",
+  "description": "Exposes photo uploading capability for groups, and introduces a custom widget for placement into group pages",
   "main": "library.js",
   "repository": {
     "type": "git",
