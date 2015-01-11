@@ -16,10 +16,17 @@
 		"static": "./static"
 	},
 	"less": [
-		"static/style.less"
+		"static/less/style.less"
+	],
+	"css": [
+		"static/vendor/fancybox/jquery.fancybox.css",
+		"static/vendor/fancybox/jquery.fancybox-thumbs.css"
 	],
 	"scripts": [
-		"static/lib/main.js"
+		"static/vendor/fancybox/jquery.fancybox.pack.js",
+		"static/vendor/fancybox/jquery.fancybox-thumbs.js",
+		"static/js/main.js",
+		"static/js/lib"
 	],
 	"templates": "static/templates"
 }

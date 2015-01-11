@@ -1,46 +1,82 @@
 "use strict";
 
-var plugin = {};
+var NodeBB = require('./lib/nodebb'),
+	SocketAdmin = NodeBB.SocketAdmin,
+	Groups = NodeBB.Groups,
+	Plugins = NodeBB.Plugins,
+	UploadsController = NodeBB.UploadsController,
+	ControllerHelpers = NodeBB.ControllerHelpers,
 
-plugin.init = function(params, callback) {
-	console.log('nodebb-plugin-quickstart: loaded');
+	Config = require('./lib/config'),
+	Gallery = require('./lib/gallery'),
 
+	GroupGallery = {};
+
+GroupGallery.init = function(params, callback) {
 	var app = params.router,
 		middleware = params.middleware,
-		controllers = params.controllers;
-		
-	// We create two routes for every view. One API call, and the actual route itself.
-	// Just add the buildHeader middleware to your route and NodeBB will take care of everything for you.
+		multipartMiddleware = require('connect-multiparty')();
 
-	app.get('/admin/plugins/quickstart', middleware.admin.buildHeader, renderAdmin);
-	app.get('/api/admin/plugins/quickstart', renderAdmin);
+	app.get('/admin/plugins/' + Config.plugin.id, middleware.admin.buildHeader, renderAdmin);
+	app.get('/api/admin/plugins/' + Config.plugin.id, renderAdmin);
+	app.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, renderImages);
+	app.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
+		middleware.authenticate, middleware.checkGlobalPrivacySettings, uploadImage);
+
+	SocketAdmin[Config.plugin.id] = Config.adminSockets;
 
 	callback();
 };
 
-plugin.addAdminNavigation = function(header, callback) {
+GroupGallery.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
-		route: '/plugins/quickstart',
-		icon: 'fa-tint',
-		name: 'Quickstart'
+		route: '/plugins/' + Config.plugin.id,
+		icon: Config.plugin.icon,
+		name: Config.plugin.name
 	});
 
 	callback(null, header);
 };
 
-
 function renderAdmin(req, res, next) {
-	/*
-	Make sure the route matches your path to template exactly.
-
-	If your route was:
-		myforum.com/some/complex/route/
-	your template should be:
-		templates/some/complex/route.tpl
-	and you would render it like so:
-		res.render('some/complex/route');    */
-
-	res.render('admin/plugins/quickstart', {});
+	res.render('admin/plugins/' + Config.plugin.id, {});
 }
 
-module.exports = plugin;
+function renderImages(req, res, next) {
+	Groups.exists(req.params.name, function(err, exists) {
+		if (err || !exists) {
+			return ControllerHelpers.notFound(req, res);
+		}
+
+		Gallery.getImagesByGroupName({
+			groupName: req.params.name
+		}, function(err, images) {
+			res.json(JSON.stringify(images));
+		});
+	});
+}
+
+function uploadImage(req, res, next) {
+	UploadsController.upload(req, res, function(file, next) {
+		if (Plugins.hasListeners('filter:uploadImage')) {
+			Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
+				if (err) {
+					return next(err);
+				}
+
+				Gallery.addImage({
+					uid: req.user.uid,
+					url: data.url,
+					groupName: req.params.name
+				}, function(err, id) {
+					console.log("Image saved with id " + id);
+					next(err, data);
+				});
+			});
+		} else {
+			next(new Error('no-upload-plugin'))
+		}
+	}, next);
+}
+
+module.exports = GroupGallery;

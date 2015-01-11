@@ -22,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/nodebb/nodebb-plugin-group-gallery/issues"
   },
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "dependencies": {
+	  "async": "~0.9.0",
+	  "connect-multiparty": "^1.2.4"
+  }
 }
