@@ -39,7 +39,9 @@
 				return;
 			}
 
-			$('[data-func="modal.open"]').off('click.group-gallery').on('click.group-gallery', GroupGallery.modal.open);
+			var clickEvent = 'click.group-gallery';
+			$('[data-func="group-gallery.modal.open"]').off(clickEvent).on(clickEvent, GroupGallery.modal.open);
+			$('[data-func="group-gallery.upload"]').off(clickEvent).on(clickEvent, GroupGallery.uploader.open);
 			//console.log('[nodebb-plugin-group-gallery] Successfully loaded with ' + self.groupImages.length + ' images.');
 		}
 
