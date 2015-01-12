@@ -19,9 +19,9 @@ GroupGallery.init = function(params, callback) {
 
 	app.get('/admin/plugins/' + Config.plugin.id, middleware.admin.buildHeader, renderAdmin);
 	app.get('/api/admin/plugins/' + Config.plugin.id, renderAdmin);
-	app.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, renderImages);
+	app.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
 	app.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
-		middleware.authenticate, middleware.checkGlobalPrivacySettings, uploadImage);
+		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
 
 	SocketAdmin[Config.plugin.id] = Config.adminSockets;
 
@@ -43,15 +43,11 @@ function renderAdmin(req, res, next) {
 }
 
 function renderImages(req, res, next) {
-	Groups.exists(req.params.name, function(err, exists) {
-		if (err || !exists) {
-			return ControllerHelpers.notFound(req, res);
-		}
-
-		Gallery.getImagesByGroupName({
-			groupName: req.params.name
-		}, function(err, images) {
-			res.json(JSON.stringify(images));
+	Gallery.getImagesByGroupName({
+		group: req.params.name
+	}, function(err, images) {
+		res.render('group-gallery/page', {
+			images: images
 		});
 	});
 }
@@ -67,7 +63,7 @@ function uploadImage(req, res, next) {
 				Gallery.addImage({
 					uid: req.user.uid,
 					url: data.url,
-					groupName: req.params.name
+					group: req.params.name
 				}, function(err, id) {
 					console.log("Image saved with id " + id);
 					next(err, data);
@@ -77,6 +73,16 @@ function uploadImage(req, res, next) {
 			next(new Error('no-upload-plugin'))
 		}
 	}, next);
+}
+
+function groupExists(req, res, next) {
+	Groups.exists(req.params.name, function(err, exists) {
+		if (err || !exists) {
+			ControllerHelpers.notFound(req, res);
+		} else {
+			next();
+		}
+	});
 }
 
 module.exports = GroupGallery;
