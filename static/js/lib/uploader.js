@@ -7,7 +7,7 @@
 
 	Uploader.open = function() {
 		if (GroupGallery.groupName) {
-			if (uploader === null) {
+			if (uploaderModule === null) {
 				loadUploaderModule();
 			} else {
 				var route = '/groups/' + GroupGallery.groupName + '/images/upload';
