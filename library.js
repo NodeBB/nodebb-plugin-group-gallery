@@ -1,7 +1,6 @@
 "use strict";
 
 var NodeBB = require('./lib/nodebb'),
-	SocketAdmin = NodeBB.SocketAdmin,
 	Groups = NodeBB.Groups,
 	Plugins = NodeBB.Plugins,
 	UploadsController = NodeBB.UploadsController,
@@ -23,7 +22,8 @@ GroupGallery.init = function(params, callback) {
 	app.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
 
-	SocketAdmin[Config.plugin.id] = Config.adminSockets;
+	NodeBB.SocketAdmin[Config.plugin.id] = Config.adminSockets;
+	NodeBB.SocketPlugins[Config.plugin.id] = require('./lib/sockets');
 
 	callback();
 };
@@ -43,9 +43,7 @@ function renderAdmin(req, res, next) {
 }
 
 function renderImages(req, res, next) {
-	Gallery.getImagesByGroupName({
-		group: req.params.name
-	}, function(err, images) {
+	Gallery.getImagesByGroupName(req.params.name, 0, -1, function(err, images) {
 		res.render('group-gallery/page', {
 			images: images
 		});

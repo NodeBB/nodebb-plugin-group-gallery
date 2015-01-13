@@ -7,6 +7,12 @@
                 </div>
             </div>
             <h2>Comments</h2>
+            <div class="input-group">
+                <input id="group-gallery-comment-input" type="text" class="form-control" placeholder="Enter a comment...">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" data-func="group-gallery.comment">Submit</button>
+                </span>
+            </div>
             <hr>
             <div class="group-gallery-comments">
 

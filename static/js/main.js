@@ -18,6 +18,7 @@
 		lightboxOptions: {
 			index: 0,
 			tpl: null,
+			fitToView: false,
 			helpers: {
 				title: null
 			}
