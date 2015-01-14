@@ -5,7 +5,8 @@
 	var socketEvents = {
 			newComment: 'event:group-gallery.newComment',
 			removeComment: 'event:group-gallery.removeComment',
-			editComment: 'event:group-gallery.editComment'
+			editComment: 'event:group-gallery.editComment',
+			removeImage: 'event:group-gallery.removeImage'
 		},
 
 		Modal = {};
@@ -15,16 +16,20 @@
 			id = el.data('group-gallery-id'),
 			index = parseInt(GroupGallery.indexLookup[id], 10);
 
+		Modal.openOnIndex(index);
+
+		event.preventDefault();
+		return false;
+	};
+
+	Modal.openOnIndex = function(index) {
 		if (!isNaN(index) && index > -1) {
 			GroupGallery.lightboxOptions.index = index;
 			GroupGallery.lightboxOptions.beforeLoad = beforeLoad;
 			GroupGallery.lightboxOptions.afterLoad = afterLoad;
 			GroupGallery.lightboxOptions.beforeClose = beforeClose;
-			$.fancybox(GroupGallery.groupImages, GroupGallery.lightboxOptions);
+			$.fancybox(GroupGallery.lightboxImages, GroupGallery.lightboxOptions);
 		}
-
-		event.preventDefault();
-		return false;
 	};
 
 	Modal.clearComments = function() {
@@ -68,7 +73,7 @@
 	}
 
 	function sendComment(comment) {
-		var id = parseInt(GroupGallery.idLookup[$.fancybox.current.index], 10);
+		var id = parseInt(GroupGallery.idLookup[this.index], 10);
 		if (!isNaN(id)) {
 			socket.emit('plugins.group-gallery.addComment', {
 				imageId: id,
@@ -98,7 +103,7 @@
 						'<div class="form-group">' +
 							'<input id="group-gallery-comment-input-edit" type="text" class="form-control" value="' + current + '">' +
 						'</div>')
-					.on('keypress.edit', '#group-gallery-comment-input-edit', function(e) {
+					.on('keypress.group-gallery', '#group-gallery-comment-input-edit', function(e) {
 						if (e.which === 13 && !e.shiftKey) {
 							socket.emit('plugins.group-gallery.editComment', {
 								commentId: id,
@@ -123,37 +128,52 @@
 		}
 	}
 
+	function removeImage(id) {
+		if (!isNaN(id)) {
+			socket.emit('plugins.group-gallery.removeImage', {imageId: id});
+		}
+	}
+
 	function bindEvents(id) {
 		var commentInput = $('#group-gallery-comment-input'),
 			commentButton = $('[data-func="group-gallery.comment"]'),
 			commentsDiv = $('.group-gallery-comments'),
-			editButtonSelector = '[data-func="group-gallery.comment.edit"]',
-			removeButtonSelector = '[data-func="group-gallery.comment.remove"]';
+			editCommentButtonSelector = '[data-func="group-gallery.comment.edit"]',
+			removeCommentButtonSelector = '[data-func="group-gallery.comment.remove"]',
+			removeImageButton = $('[data-func="group-gallery.remove"]'),
+			self = this;
 
-		commentInput.on('keypress.comment', function(e) {
+		commentInput.on('keypress.group-gallery', function(e) {
 			if (e.which === 13 && !e.shiftKey) {
-				sendComment(commentInput.val());
+				sendComment.apply(self, [commentInput.val()]);
 				commentInput.val('');
 			}
 		});
 
-		commentButton.on('click.comment', function(e){
-			sendComment(commentInput.val());
+		commentButton.on('click.group-gallery', function(e){
+			sendComment.apply(self, [commentInput.val()]);
 			commentInput.val('');
 			return false;
 		});
 
-		commentsDiv.on('click.comment', editButtonSelector, function(e) {
-			var id = $(e.currentTarget).parents('[data-comment-id]').data('commentId');
-			editComment(id);
+		commentsDiv.on('click.group-gallery', editCommentButtonSelector, function(e) {
+			var commentId = $(e.currentTarget).parents('[data-comment-id]').data('commentId');
+			editComment.apply(self, [commentId]);
 
 			e.preventDefault();
 			return false;
 		});
 
-		commentsDiv.on('click.comment', removeButtonSelector, function(e) {
-			var id = $(e.currentTarget).parents('[data-comment-id]').data('commentId');
-			removeComment(id);
+		commentsDiv.on('click.group-gallery', removeCommentButtonSelector, function(e) {
+			var commentId = $(e.currentTarget).parents('[data-comment-id]').data('commentId');
+			removeComment.apply(self, [commentId]);
+
+			e.preventDefault();
+			return false;
+		});
+
+		removeImageButton.on('click.group-gallery', function(e) {
+			removeImage.apply(self, [id]);
 
 			e.preventDefault();
 			return false;
@@ -173,22 +193,33 @@
 			var comment = data[0];
 			$('[data-comment-id="' + comment.id + '"] .group-gallery-comment-content').html(comment.content);
 		});
+
+		socket.on(socketEvents.removeImage, function(imageId) {
+			var index = GroupGallery.indexLookup[parseInt(imageId, 10)];
+			if (parseInt(imageId, 10) === id) {
+				$.fancybox.next();
+			}
+			self.group.splice(index, 1);
+		});
 	}
 
 	function unbindEvents() {
 		var commentInput = $('#group-gallery-comment-input'),
 			commentButton = $('[data-func="group-gallery.comment"]'),
 			commentsDiv = $('.group-gallery-comments'),
-			editButtonSelector = '[data-func="group-gallery.comment.edit"]',
-			removeButtonSelector = '[data-func="group-gallery.comment.remove"]';
+			editCommentButtonSelector = '[data-func="group-gallery.comment.edit"]',
+			removeCommentButtonSelector = '[data-func="group-gallery.comment.remove"]',
+			removeImageButton = $('[data-func="group-gallery.remove"]');
 
-		commentInput.off('keypress.comment');
-		commentButton.off('click.comment');
-		commentsDiv.off('click.comment', editButtonSelector);
-		commentsDiv.off('click.comment', removeButtonSelector);
+		commentInput.off('keypress.group-gallery');
+		commentButton.off('click.group-gallery');
+		commentsDiv.off('click.group-gallery', editCommentButtonSelector);
+		commentsDiv.off('click.group-gallery', removeCommentButtonSelector);
+		removeImageButton.off('click.group-gallery');
 
 		socket.off(socketEvents.newComment);
 		socket.off(socketEvents.removeComment);
+		socket.off(socketEvents.removeImage);
 	}
 
 	GroupGallery.modal = Modal;

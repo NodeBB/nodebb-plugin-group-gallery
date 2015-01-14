@@ -13,8 +13,9 @@
 	var GroupGallery = {
 		groupName: null,
 		groupImages: null,
-		indexLookup: [],
+		indexLookup: {},
 		idLookup: [],
+		lightboxImages: null,
 		lightboxOptions: {
 			index: 0,
 			tpl: null,
@@ -25,7 +26,7 @@
 		}
 	};
 
-	GroupGallery.init = function(groupName) {
+	GroupGallery.init = function(groupName, callback) {
 		var self = this;
 
 		function load() {
@@ -40,10 +41,9 @@
 				return;
 			}
 
-			var clickEvent = 'click.group-gallery';
-			$('[data-func="group-gallery.modal.open"]').off(clickEvent).on(clickEvent, GroupGallery.modal.open);
-			$('[data-func="group-gallery.upload"]').off(clickEvent).on(clickEvent, GroupGallery.uploader.open);
-			//console.log('[nodebb-plugin-group-gallery] Successfully loaded with ' + self.groupImages.length + ' images.');
+			self.bindEvents();
+
+			if (callback) callback();
 		}
 
 		function loadTemplate() {
@@ -64,14 +64,7 @@
 			$.ajax({
 				url: '/api/groups/' + self.groupName + '/images',
 				success: function(result) {
-					self.groupImages = result.images.map(function(el, index) {
-						self.indexLookup[el.id] = index;
-						self.idLookup[index] = el.id;
-						return {
-							href: el.url,
-							title: ''
-						};
-					});
+					self.addImages(result.images);
 				},
 				error: function() {
 					self.groupImages = [];
@@ -83,6 +76,46 @@
 		}
 
 		load();
+	};
+
+	GroupGallery.addImages = function(images) {
+		var self = this;
+
+		if (!Array.isArray(this.groupImages)) {
+			this.groupImages = [];
+		}
+
+		this.groupImages = this.groupImages.concat(images);
+		this.lightboxImages = this.groupImages.map(function(el, index) {
+			self.indexLookup[el.id] = index;
+			self.idLookup[index] = el.id;
+			return {
+				href: el.url,
+				title: ''
+			};
+		});
+	};
+
+	GroupGallery.bindEvents = function() {
+		var event = 'event:group-gallery.newImage';
+		socket.off(event).on(event, function(image) {
+			// Image is an array of length one
+			GroupGallery.addImages(image);
+			var index = GroupGallery.indexLookup[image[0].id];
+
+			if (parseInt(image[0].uid, 10) === parseInt(app.uid, 10)) {
+				GroupGallery.modal.openOnIndex(index);
+			} else if ($.fancybox.current !== null) {
+				$.fancybox.current.group.push(GroupGallery.lightboxImages[index]);
+			}
+		});
+
+		var clickEvent = 'click.group-gallery';
+		$(document.body)
+			.off(clickEvent, '[data-func="group-gallery.modal.open"]')
+			.off(clickEvent, '[data-func="group-gallery.upload"]')
+			.on(clickEvent, '[data-func="group-gallery.modal.open"]', GroupGallery.modal.open)
+			.on(clickEvent, '[data-func="group-gallery.upload"]', GroupGallery.uploader.open);
 	};
 
 	window.GroupGallery = GroupGallery;

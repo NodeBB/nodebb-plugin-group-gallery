@@ -62,8 +62,8 @@ function uploadImage(req, res, next) {
 					uid: req.user.uid,
 					url: data.url,
 					group: req.params.name
-				}, function(err, id) {
-					console.log("Image saved with id " + id);
+				}, function(err, image) {
+					NodeBB.SocketIndex.server.sockets.emit('event:group-gallery.newImage', image);
 					next(err, data);
 				});
 			});

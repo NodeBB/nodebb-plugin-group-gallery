@@ -10,10 +10,12 @@
 			if (uploaderModule === null) {
 				loadUploaderModule();
 			} else {
+				if ($.fancybox.current !== null) {
+					$.fancybox.close();
+				}
+
 				var route = '/groups/' + GroupGallery.groupName + '/images/upload';
-				uploaderModule.open(route, {}, null, function(url) {
-					console.log(url);
-				});
+				uploaderModule.open(route, {}, null, function(image) {});
 			}
 		}
 	};
