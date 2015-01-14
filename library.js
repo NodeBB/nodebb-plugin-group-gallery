@@ -53,7 +53,7 @@ GroupGallery.defineWidget = function(widgets, callback) {
 };
 
 GroupGallery.renderWidget = function(widget, callback) {
-	// TODO: is this solid enough?
+	// is this solid enough?
 	if (widget.area.template.indexOf('groups') === 0) {
 		var match = /^groups\/(\w+)(?:$|\/)/.exec(widget.area.url);
 		if (match) {
@@ -64,7 +64,14 @@ GroupGallery.renderWidget = function(widget, callback) {
 			callback(null, '');
 		}
 	} else {
-		callback(null, '');
+		NodeBB.User.isAdministrator(widget.uid, function(err, isAdmin) {
+			var html = '';
+			if (isAdmin) {
+				html = '<div class="alert alert-warning">The Group Gallery widget only works on group pages. <br><a href="/admin/extend/widgets">&#187; Widget settings</a></a></div>'
+			}
+
+			callback(null, html);
+		});
 	}
 };
 
