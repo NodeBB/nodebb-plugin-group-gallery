@@ -6,13 +6,7 @@
     <div class="col-xs-3">
         <a class="group-gallery-widget-image" href="{images.url}"
            data-group-gallery-id="{images.id}" data-func="group-gallery.modal.open">
-            <div class="outer">
-                <div class="between">
-                    <div class="inner">
-                        <img src="{images.url}" class="img-responsive">
-                    </div>
-                </div>
-            </div>
+            <div class="crop" style="background-image: url({images.url})"></div>
         </a>
     </div>
 <!-- END images -->
