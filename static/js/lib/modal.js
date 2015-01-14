@@ -194,10 +194,22 @@
 
 		socket.on(socketEvents.removeImage, function(imageId) {
 			var index = GroupGallery.indexLookup[parseInt(imageId, 10)];
-			if (parseInt(imageId, 10) === id) {
-				$.fancybox.next();
+
+			if (!isNaN(index)) {
+				// Remove image from the image list, reindex them
+				GroupGallery.groupImages.splice(index, 1);
+				GroupGallery.indexImages();
+				self.group.splice(index, 1);
+
+				if (parseInt(imageId, 10) === id) {
+					if (self.group.length < 1) {
+						$.fancybox.close();
+					} else {
+						// We also removed it from the fancybox list, so the same index will be the next image
+						$.fancybox.jumpto(index);
+					}
+				}
 			}
-			self.group.splice(index, 1);
 		});
 	}
 

@@ -78,13 +78,19 @@
 	};
 
 	GroupGallery.addImages = function(images) {
-		var self = this;
-
 		if (!Array.isArray(this.groupImages)) {
 			this.groupImages = [];
 		}
 
 		this.groupImages = this.groupImages.concat(images);
+		this.indexImages();
+	};
+
+	GroupGallery.indexImages = function() {
+		var self = this;
+
+		this.indexLookup = {};
+		this.idLookup = [];
 		this.lightboxImages = this.groupImages.map(function(el, index) {
 			self.indexLookup[el.id] = index;
 			self.idLookup[index] = el.id;
