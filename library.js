@@ -55,14 +55,10 @@ GroupGallery.defineWidget = function(widgets, callback) {
 GroupGallery.renderWidget = function(widget, callback) {
 	// is this solid enough?
 	if (widget.area.template.indexOf('groups') === 0) {
-		var match = /^groups\/(\w+)(?:$|\/)/.exec(widget.area.url);
-		if (match) {
-			Gallery.getImagesByGroupName(match[1], 0, 10, function(err, images) {
-				app.render('group-gallery/widget', {images: images}, callback);
-			});
-		} else {
-			callback(null, '');
-		}
+		var groupName = decodeURIComponent(widget.area.url).split('/')[1];
+		Gallery.getImagesByGroupName(groupName, 0, 10, function(err, images) {
+			app.render('group-gallery/widget', {images: images}, callback);
+		});
 	} else {
 		NodeBB.User.isAdministrator(widget.uid, function(err, isAdmin) {
 			var html = '';
