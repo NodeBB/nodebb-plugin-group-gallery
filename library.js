@@ -71,6 +71,10 @@ GroupGallery.renderWidget = function(widget, callback) {
 	}
 };
 
+GroupGallery.groupRename = function(data) {
+	Gallery.renameGroup(data.old, data.new);
+};
+
 function renderAdmin(req, res, next) {
 	res.render('admin/plugins/' + Config.plugin.id, {});
 }
