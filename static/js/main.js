@@ -3,10 +3,9 @@
 (function(window) {
 
 	$(window).on('action:ajaxify.end', function(event, data) {
-		// TODO: reliably get the group name
-		var results = /^groups\/(\w+)(?:$|\/)/.exec(data.url);
-		if (results && results.length > 1) {
-			GroupGallery.init(results[1]);
+		var groupName = ajaxify.variables.get('group_name');
+		if (groupName) {
+			GroupGallery.init(groupName);
 		}
 	});
 
