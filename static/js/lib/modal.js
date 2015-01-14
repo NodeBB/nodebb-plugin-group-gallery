@@ -24,8 +24,8 @@
 
 	Modal.openOnIndex = function(index) {
 		GroupGallery.lightboxOptions.index = isNaN(index) || index < 0 ? 0 : index;
-		GroupGallery.lightboxOptions.beforeLoad = beforeLoad;
-		GroupGallery.lightboxOptions.afterLoad = afterLoad;
+		GroupGallery.lightboxOptions.beforeShow = beforeShow;
+		GroupGallery.lightboxOptions.afterShow = afterShow;
 		GroupGallery.lightboxOptions.beforeClose = beforeClose;
 		$.fancybox(GroupGallery.lightboxImages, GroupGallery.lightboxOptions);
 	};
@@ -47,14 +47,20 @@
 		});
 	};
 
-	function beforeLoad() {
+	function beforeShow() {
 		Modal.clearComments.apply(this);
 	}
 
-	function afterLoad() {
+	function afterShow() {
 		var id = parseInt(GroupGallery.idLookup[this.index], 10);
 		if (!isNaN(id)) {
-			loadComments.apply(this, [id]);
+			var _setDimension = $.fancybox._setDimension;
+			$.fancybox._setDimension = function() {
+				_setDimension();
+				loadComments.apply(this, [id]);
+				$.fancybox._setDimension = _setDimension;
+			};
+
 			unbindEvents.apply(this);
 			bindEvents.apply(this, [id]);
 		}
@@ -127,6 +133,7 @@
 	}
 
 	function removeImage(id) {
+		console.log(id);
 		if (!isNaN(id)) {
 			socket.emit('plugins.group-gallery.removeImage', {imageId: id});
 		}
