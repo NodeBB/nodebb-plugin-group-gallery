@@ -1,4 +1,46 @@
-.group-gallery {
+@imageHeight: 100px;
+
+.group-gallery-widget {
+  margin: 0;
+
+  .col-xs-3 {
+    padding: 5px;
+  }
+}
+
+.group-gallery-widget-image {
+  /* 1. Crop landscape image (cut left and right) */
+  .outer{
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    overflow:hidden;
+  }
+  .between{
+    /* height as the multiplicity of outer's width */
+    padding-top: 100%;
+  }
+  .inner{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* how much to crop */
+    left: 0;
+    right: 0;
+  }
+
+  /* 2. Crop portrait image (cut top and bottom) */
+  .crop{
+    float: left;
+    overflow: hidden;
+    width: 100%;
+  }
+  .crop img{
+    margin: /* cut top: */ 0 0 /* cut bottom: */ 0 0;
+  }
+}
+
+.group-gallery-modal {
   .panel-body {
     padding: 0px;
   }

@@ -1,4 +1,4 @@
-<div class="fancybox-wrap group-gallery" tabIndex="-1">
+<div class="fancybox-wrap group-gallery-modal" tabIndex="-1">
     <div class="panel panel-default fancybox-skin">
         <div class="panel-body">
             <div class="fancybox-outer">

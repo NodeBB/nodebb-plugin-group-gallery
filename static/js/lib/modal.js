@@ -23,13 +23,11 @@
 	};
 
 	Modal.openOnIndex = function(index) {
-		if (!isNaN(index) && index > -1) {
-			GroupGallery.lightboxOptions.index = index;
-			GroupGallery.lightboxOptions.beforeLoad = beforeLoad;
-			GroupGallery.lightboxOptions.afterLoad = afterLoad;
-			GroupGallery.lightboxOptions.beforeClose = beforeClose;
-			$.fancybox(GroupGallery.lightboxImages, GroupGallery.lightboxOptions);
-		}
+		GroupGallery.lightboxOptions.index = isNaN(index) || index < 0 ? 0 : index;
+		GroupGallery.lightboxOptions.beforeLoad = beforeLoad;
+		GroupGallery.lightboxOptions.afterLoad = afterLoad;
+		GroupGallery.lightboxOptions.beforeClose = beforeClose;
+		$.fancybox(GroupGallery.lightboxImages, GroupGallery.lightboxOptions);
 	};
 
 	Modal.clearComments = function() {

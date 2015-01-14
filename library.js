@@ -9,21 +9,24 @@ var NodeBB = require('./lib/nodebb'),
 	Config = require('./lib/config'),
 	Gallery = require('./lib/gallery'),
 
-	GroupGallery = {};
+	GroupGallery = {},
+	app;
 
 GroupGallery.init = function(params, callback) {
-	var app = params.router,
+	var router = params.router,
 		middleware = params.middleware,
 		multipartMiddleware = require('connect-multiparty')();
 
-	app.get('/admin/plugins/' + Config.plugin.id, middleware.admin.buildHeader, renderAdmin);
-	app.get('/api/admin/plugins/' + Config.plugin.id, renderAdmin);
-	app.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
-	app.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
+	router.get('/admin/plugins/' + Config.plugin.id, middleware.admin.buildHeader, renderAdmin);
+	router.get('/api/admin/plugins/' + Config.plugin.id, renderAdmin);
+	router.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
+	router.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
 
 	NodeBB.SocketAdmin[Config.plugin.id] = Config.adminSockets;
 	NodeBB.SocketPlugins[Config.plugin.id] = require('./lib/sockets');
+
+	app = params.app;
 
 	callback();
 };
@@ -36,6 +39,33 @@ GroupGallery.addAdminNavigation = function(header, callback) {
 	});
 
 	callback(null, header);
+};
+
+GroupGallery.defineWidget = function(widgets, callback) {
+	widgets.push({
+		name: Config.plugin.name,
+		widget: Config.plugin.id,
+		description: Config.plugin.description,
+		content: ''
+	});
+
+	callback(null, widgets);
+};
+
+GroupGallery.renderWidget = function(widget, callback) {
+	// TODO: is this solid enough?
+	if (widget.area.template.indexOf('groups') === 0) {
+		var match = /^groups\/(\w+)(?:$|\/)/.exec(widget.area.url);
+		if (match) {
+			Gallery.getImagesByGroupName(match[1], 0, 10, function(err, images) {
+				app.render('group-gallery/widget', {images: images}, callback);
+			});
+		} else {
+			callback(null, '');
+		}
+	} else {
+		callback(null, '');
+	}
 };
 
 function renderAdmin(req, res, next) {
