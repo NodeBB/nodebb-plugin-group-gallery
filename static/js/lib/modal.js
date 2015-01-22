@@ -176,11 +176,11 @@
 			return false;
 		});
 
-        if (parseInt(GroupGallery.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
-            removeImageButton.removeClass('hidden');
-        } else {
-            removeImageButton.addClass('hidden');
-        }
+		if (parseInt(GroupGallery.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
+			removeImageButton.removeClass('hidden');
+		} else {
+			removeImageButton.addClass('hidden');
+		}
 
         removeImageButton.on('click.group-gallery', function(e) {
             removeImage.apply(self, [id]);
