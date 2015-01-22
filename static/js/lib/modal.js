@@ -176,11 +176,6 @@
 			return false;
 		});
 
-
-        console.log(GroupGallery.groupImages[this.index].uid);
-        console.log(app.uid);
-        console.log(app.isAdmin);
-        debugger;
         if (parseInt(GroupGallery.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
             removeImageButton.removeClass('hidden');
         } else {
