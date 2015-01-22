@@ -17,8 +17,6 @@ GroupGallery.init = function(params, callback) {
 		middleware = params.middleware,
 		multipartMiddleware = require('connect-multiparty')();
 
-	router.get('/admin/plugins/' + Config.plugin.id, middleware.admin.buildHeader, renderAdmin);
-	router.get('/api/admin/plugins/' + Config.plugin.id, renderAdmin);
 	router.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
 	router.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
@@ -29,16 +27,6 @@ GroupGallery.init = function(params, callback) {
 	app = params.app;
 
 	callback();
-};
-
-GroupGallery.addAdminNavigation = function(header, callback) {
-	header.plugins.push({
-		route: '/plugins/' + Config.plugin.id,
-		icon: Config.plugin.icon,
-		name: Config.plugin.name
-	});
-
-	callback(null, header);
 };
 
 GroupGallery.defineWidget = function(widgets, callback) {
@@ -74,10 +62,6 @@ GroupGallery.renderWidget = function(widget, callback) {
 GroupGallery.groupRename = function(data) {
 	Gallery.renameGroup(data.old, data.new);
 };
-
-function renderAdmin(req, res, next) {
-	res.render('admin/plugins/' + Config.plugin.id, {});
-}
 
 function renderImages(req, res, next) {
 	Gallery.getImagesByGroupName(req.params.name, 0, -1, function(err, images) {
