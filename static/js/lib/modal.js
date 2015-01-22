@@ -133,7 +133,6 @@
 	}
 
 	function removeImage(id) {
-		console.log(id);
 		if (!isNaN(id)) {
 			socket.emit('plugins.group-gallery.removeImage', {imageId: id});
 		}
@@ -177,12 +176,23 @@
 			return false;
 		});
 
-		removeImageButton.on('click.group-gallery', function(e) {
-			removeImage.apply(self, [id]);
 
-			e.preventDefault();
-			return false;
-		});
+        console.log(GroupGallery.groupImages[this.index].uid);
+        console.log(app.uid);
+        console.log(app.isAdmin);
+        debugger;
+        if (parseInt(GroupGallery.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
+            removeImageButton.removeClass('hidden');
+        } else {
+            removeImageButton.addClass('hidden');
+        }
+
+        removeImageButton.on('click.group-gallery', function(e) {
+            removeImage.apply(self, [id]);
+
+            e.preventDefault();
+            return false;
+        });
 
 		socket.on(socketEvents.newComment, function(data) {
 			if (parseInt(data[0].image, 10) === id) {

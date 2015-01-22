@@ -7,7 +7,7 @@
                 </div>
             </div>
             <br>
-            <button data-func="group-gallery.remove" class="btn btn-danger" type="button">Remove</button>
+            <button data-func="group-gallery.remove" class="btn btn-danger hidden" type="button">Remove</button>
             <button data-func="group-gallery.upload" class="btn btn-default" type="button">Upload</button>
             <h2>Comments</h2>
             <div class="input-group">
