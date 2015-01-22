@@ -41,17 +41,22 @@ GroupGallery.defineWidget = function(widgets, callback) {
 };
 
 GroupGallery.renderWidget = function(widget, callback) {
-	// is this solid enough?
 	if (widget.area.template.indexOf('groups') === 0) {
-		var groupName = decodeURIComponent(widget.area.url).split('/')[1];
-		Gallery.getImagesByGroupName(groupName, 0, 10, function(err, images) {
-			app.render('group-gallery/widget', {images: images}, callback);
-		});
+		var parts = decodeURIComponent(widget.area.url).split('/');
+		if (Array.isArray(parts) && parts.length) {
+			// I have been assured by baris and julian that this is solid enough.
+			var groupName = parts[parts.length - 1];
+			Gallery.getImagesByGroupName(groupName, 0, 10, function(err, images) {
+				app.render('group-gallery/widget', {images: images}, callback);
+			});
+		} else {
+			callback(null, '<div class="alert alert-warning">An error occurred trying to render this widget.</div>');
+		}
 	} else {
 		NodeBB.User.isAdministrator(widget.uid, function(err, isAdmin) {
 			var html = '';
 			if (isAdmin) {
-				html = '<div class="alert alert-warning">The Group Gallery widget only works on group pages. <br><a href="/admin/extend/widgets">&#187; Widget settings</a></a></div>'
+				html = '<div class="alert alert-warning">The Group Gallery widget only works on group pages. <br><a href="/admin/extend/widgets">&#187; Widget settings</a></a></div>';
 			}
 
 			callback(null, html);
