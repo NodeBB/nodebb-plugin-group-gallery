@@ -1,4 +1,6 @@
+<!-- IF images.length -->
 <button data-func="group-gallery.modal.open" class="btn btn-default" type="button">Open</button>
+<!-- ENDIF images.length -->
 <button data-func="group-gallery.upload" class="btn btn-default" type="button">Upload</button>
 <hr>
 <div class="row group-gallery-widget">
