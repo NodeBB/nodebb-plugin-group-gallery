@@ -46,7 +46,7 @@ GroupGallery.renderWidget = function(widget, callback) {
 		if (Array.isArray(parts) && parts.length) {
 			// I have been assured by baris and julian that this is solid enough.
 			var groupName = parts[parts.length - 1];
-			Gallery.getImagesByGroupName(groupName, 0, 3, function(err, images) {
+			Gallery.getImagesByGroupName(groupName, 0, 2, function(err, images) {
 				app.render('group-gallery/widget', {images: images}, callback);
 			});
 		} else {
