@@ -70,7 +70,7 @@ GroupGallery.groupRename = function(data) {
 
 function renderImages(req, res, next) {
 	Gallery.getImagesByGroupName(req.params.name, 0, -1, function(err, images) {
-		res.render('group-gallery/page', {
+		res.status(200).json({
 			images: images
 		});
 	});

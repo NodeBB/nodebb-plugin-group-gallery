@@ -4,8 +4,8 @@
 
 	$(window).on('action:ajaxify.end', function(event, data) {
 		var groupName = ajaxify.variables.get('group_name');
-		if (groupName) {
-			GroupGallery.init(groupName);
+		if (groupName && groupName.length) {
+			GroupGallery.init(utils.slugify(groupName));
 		}
 	});
 
