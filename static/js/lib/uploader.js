@@ -15,7 +15,11 @@
 				}
 
 				var route = '/groups/' + GroupGallery.groupName + '/images/upload';
-				uploaderModule.open(route, {}, null, function(image) {});
+				bootbox.prompt('Image caption', function(caption) {
+					if (caption !== null) {
+						uploaderModule.open(route, {caption: caption}, null, function(image) {});
+					}
+				});
 			}
 		}
 	};

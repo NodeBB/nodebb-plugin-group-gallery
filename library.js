@@ -26,7 +26,7 @@ GroupGallery.init = function(params, callback) {
 
 	app = params.app;
 
-	callback();
+	Config.init(callback);
 };
 
 GroupGallery.defineWidget = function(widgets, callback) {
@@ -102,7 +102,8 @@ function renderImages(req, res, next) {
 
 function uploadImage(req, res, next) {
 	UploadsController.upload(req, res, function(file, next) {
-		if (NodeBB.Plugins.hasListeners('filter:uploadImage')) {
+		var params = JSON.parse(req.body.params);
+		if (params && params.caption && params.caption.length && NodeBB.Plugins.hasListeners('filter:uploadImage')) {
 			NodeBB.Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
 				if (err) {
 					return next(err);
@@ -111,7 +112,8 @@ function uploadImage(req, res, next) {
 				Gallery.addImage({
 					uid: req.user.uid,
 					url: data.url,
-					group: req.params.name
+					group: req.params.name,
+					caption: params.caption
 				}, function(err, image) {
 					NodeBB.SocketIndex.server.sockets.emit('event:group-gallery.newImage', image);
 					next(err, data);
