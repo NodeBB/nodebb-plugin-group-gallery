@@ -1,13 +1,13 @@
 "use strict";
 
 var NodeBB = require('./lib/nodebb'),
-	Groups = NodeBB.Groups,
-	Plugins = NodeBB.Plugins,
 	UploadsController = NodeBB.UploadsController,
 	ControllerHelpers = NodeBB.ControllerHelpers,
 
 	Config = require('./lib/config'),
 	Gallery = require('./lib/gallery'),
+
+	async = require('async'),
 
 	GroupGallery = {},
 	app;
@@ -69,17 +69,41 @@ GroupGallery.groupRename = function(data) {
 };
 
 function renderImages(req, res, next) {
-	Gallery.getImagesByGroupName(req.params.name, 0, -1, function(err, images) {
-		res.status(200).json({
-			images: images
-		});
+	var imagesPerPage = 16;
+
+	async.waterfall([
+		function(next) {
+			Gallery.getGroupImageCount(req.params.name, next);
+		},
+		function(imageCount, next) {
+			var pageCount = Math.max(1, Math.ceil((imageCount - 1) / imagesPerPage));
+
+			if (req.query.page < 1 || req.query.page > pageCount) {
+				return ControllerHelpers.notFound(req, res);
+			}
+
+			var page = parseInt(req.query.page, 10) || 1;
+			var start = (page - 1) * imagesPerPage,
+				end = start + imagesPerPage - 1;
+
+			Gallery.getImagesByGroupName(req.params.name, start, end, function(err, images) {
+				next(err, {
+					pageCount: pageCount,
+					currentPage: page,
+					images: images
+				});
+			});
+		}
+	], function(err, data) {
+		data.pagination = NodeBB.Pagination.create(data.currentPage, data.pageCount);
+		res.status(200).json(data);
 	});
 }
 
 function uploadImage(req, res, next) {
 	UploadsController.upload(req, res, function(file, next) {
-		if (Plugins.hasListeners('filter:uploadImage')) {
-			Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
+		if (NodeBB.Plugins.hasListeners('filter:uploadImage')) {
+			NodeBB.Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
 				if (err) {
 					return next(err);
 				}
@@ -100,7 +124,7 @@ function uploadImage(req, res, next) {
 }
 
 function groupExists(req, res, next) {
-	Groups.exists(req.params.name, function(err, exists) {
+	NodeBB.Groups.exists(req.params.name, function(err, exists) {
 		if (err || !exists) {
 			ControllerHelpers.notFound(req, res);
 		} else {
