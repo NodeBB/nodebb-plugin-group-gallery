@@ -18,6 +18,8 @@ GroupGallery.init = function(params, callback) {
 		multipartMiddleware = require('connect-multiparty')();
 
 	router.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
+	router.get('/api/groups/:name/image/:image_id', middleware.checkGlobalPrivacySettings, groupExists, increaseViewCount, renderSingleImage);
+
 	router.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
 
@@ -98,6 +100,32 @@ function renderImages(req, res, next) {
 		data.pagination = NodeBB.Pagination.create(data.currentPage, data.pageCount);
 		res.status(200).json(data);
 	});
+}
+
+function renderSingleImage(req, res, next) {
+	var id = parseInt(req.params.image_id, 10);
+	if (isNaN(id)) {
+		next(new Error('invalid-image'));
+	} else {
+		Gallery.getImagesByIds([id], function(err, result) {
+			if (err || !result.length) {
+				next(new Error('invalid-image'));
+			} else {
+				res.status(200).json(result[0]);
+			}
+		});
+	}
+}
+
+function increaseViewCount(req, res, next) {
+	var id = parseInt(req.params.image_id, 10);
+	if (isNaN(id)) {
+		next(new Error('invalid-image'));
+	} else {
+		Gallery.increaseViewCount(id, function(err, result) {
+			next();
+		});
+	}
 }
 
 function uploadImage(req, res, next) {
