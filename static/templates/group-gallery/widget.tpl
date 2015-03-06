@@ -11,7 +11,7 @@ There are no images in the gallery yet.
     <div class="col-xs-3">
         <a class="group-gallery-widget-image" href="{images.url}"
            data-group-gallery-id="{images.id}" data-func="group-gallery.modal.open">
-            <div class="crop" style="background-image: url({images.url})"></div>
+            <div class="group-gallery-image-crop" style="background-image: url({images.url})"></div>
         </a>
     </div>
 <!-- END images -->

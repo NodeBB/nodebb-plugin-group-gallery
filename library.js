@@ -17,8 +17,14 @@ GroupGallery.init = function(params, callback) {
 		middleware = params.middleware,
 		multipartMiddleware = require('connect-multiparty')();
 
-	router.get('/api/groups/:name/images', middleware.checkGlobalPrivacySettings, groupExists, renderImages);
-	router.get('/api/groups/:name/image/:image_id', middleware.checkGlobalPrivacySettings, groupExists, increaseViewCount, renderSingleImage);
+	router.get('/groups/:name/gallery', middleware.checkGlobalPrivacySettings, middleware.buildHeader,
+		groupExists, renderImages);
+	router.get('/groups/:name/gallery/:image_id', middleware.checkGlobalPrivacySettings, middleware.buildHeader,
+		groupExists, increaseViewCount, renderSingleImage);
+	router.get('/api/groups/:name/gallery', middleware.checkGlobalPrivacySettings,
+		groupExists, renderImages);
+	router.get('/api/groups/:name/gallery/:image_id', middleware.checkGlobalPrivacySettings,
+		groupExists, increaseViewCount, renderSingleImage);
 
 	router.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
@@ -71,14 +77,14 @@ GroupGallery.groupRename = function(data) {
 };
 
 function renderImages(req, res, next) {
-	var imagesPerPage = 16;
+	var imagesPerPage = 4;
 
 	async.waterfall([
 		function(next) {
 			Gallery.getGroupImageCount(req.params.name, next);
 		},
 		function(imageCount, next) {
-			var pageCount = Math.max(1, Math.ceil((imageCount - 1) / imagesPerPage));
+			var pageCount = Math.max(1, Math.ceil(imageCount / imagesPerPage));
 
 			if (req.query.page < 1 || req.query.page > pageCount) {
 				return ControllerHelpers.notFound(req, res);
@@ -88,17 +94,27 @@ function renderImages(req, res, next) {
 			var start = (page - 1) * imagesPerPage,
 				end = start + imagesPerPage - 1;
 
-			Gallery.getImagesByGroupName(req.params.name, start, end, function(err, images) {
+			async.parallel({
+				images: function(next) {
+					Gallery.getImagesByGroupName(req.params.name, start, end, next);
+				},
+				group: function(next) {
+					NodeBB.Groups.getGroupNameByGroupSlug(req.params.name, function(err, groupName) {
+						NodeBB.Groups.get(groupName, {}, next);
+					});
+				}
+			}, function(err, results) {
 				next(err, {
 					pageCount: pageCount,
 					currentPage: page,
-					images: images
+					images: results.images,
+					group: results.group
 				});
 			});
 		}
 	], function(err, data) {
 		data.pagination = NodeBB.Pagination.create(data.currentPage, data.pageCount);
-		res.status(200).json(data);
+		res.render('group-gallery/gallery', data);
 	});
 }
 
@@ -107,11 +123,21 @@ function renderSingleImage(req, res, next) {
 	if (isNaN(id)) {
 		next(new Error('invalid-image'));
 	} else {
-		Gallery.getImagesByIds([id], function(err, result) {
-			if (err || !result.length) {
+		async.parallel({
+			image: function(next) {
+				Gallery.getImagesByIds([id], next);
+			},
+			group: function(next) {
+				NodeBB.Groups.getGroupNameByGroupSlug(req.params.name, function(err, groupName) {
+					NodeBB.Groups.get(groupName, {}, next);
+				});
+			}
+		}, function(err, result) {
+			if (err || !result.image.length) {
 				next(new Error('invalid-image'));
 			} else {
-				res.status(200).json(result[0]);
+				result.image = result.image[0];
+				res.render('group-gallery/single', result);
 			}
 		});
 	}

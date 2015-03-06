@@ -9,15 +9,17 @@
 }
 
 .group-gallery-widget-image {
-  .crop {
-    display: inline-block;
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    padding-top: 100%;
-    background-position: center;
-    background-size: cover;
-  }
+
+}
+
+.group-gallery-image-crop {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding-top: 100%;
+  background-position: center;
+  background-size: cover;
 }
 
 .group-gallery-modal {
@@ -48,4 +50,38 @@
 // Center images smaller than the modal width
 .fancybox-inner {
   margin: 0 auto;
+}
+
+//------------ Gallery overview page ------------//
+.group-gallery-overview {
+
+}
+
+.group-gallery-overview-pagination {
+  text-align: center;
+
+  .pagination {
+    margin: 5px 0;
+  }
+}
+
+.group-gallery-overview-item {
+  padding: 0 50px;
+  text-align: center;
+
+  & > a {
+    display: block;
+  }
+
+  img {
+    width: 100%;
+  }
+}
+
+.group-gallery-overview-details p {
+  margin: 0;
+}
+
+.group-gallery-overview-details-views, .group-gallery-overview-details-comments {
+  margin: 0 10px;
 }
