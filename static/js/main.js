@@ -39,7 +39,7 @@
 				return;
 			}
 
-			if (self.vars.page !== 'overview' && (groupName !== self.vars.groupName || !self.vars.groupImages)) {
+			if (self.vars.page === 'group' && (groupName !== self.vars.groupName || !self.vars.groupImages)) {
 				self.vars.groupName = groupName;
 				loadImages();
 				return;
@@ -114,7 +114,7 @@
 			GroupGallery.addImages(image);
 			var index = GroupGallery.vars.indexLookup[image[0].id];
 
-			if (parseInt(image[0].uid, 10) === parseInt(app.uid, 10)) {
+			if (parseInt(image[0].uid, 10) === parseInt(app.user.uid, 10)) {
 				GroupGallery.modal.openOnIndex(index);
 			} else if ($.fancybox.current !== null) {
 				$.fancybox.current.group.push(GroupGallery.vars.lightboxImages[index]);
@@ -130,8 +130,8 @@
 	};
 
 	GroupGallery.checkPage = function() {
-		if (this.vars.page && this.vars.page.length && this[this.page]) {
-			this[this.page].init();
+		if (this.vars.page && this.vars.page.length && this[this.vars.page]) {
+			this[this.vars.page].init();
 		}
 	};
 
