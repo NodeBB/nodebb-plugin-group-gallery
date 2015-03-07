@@ -1,6 +1,6 @@
 <input type="hidden" template-variable="group_name" value="{group.name}" />
 <input type="hidden" template-variable="group_slug" value="{group.slug}" />
-<input type="hidden" template-variable="is_gallery_overview" value="1" />
+<input type="hidden" template-variable="group_gallery_page" value="overview" />
 <input type="hidden" template-variable="currentPage" value="{currentPage}" />
 <input type="hidden" template-variable="pageCount" value="{pageCount}" />
 
@@ -21,11 +21,11 @@
             <div class="col-sm-3 group-gallery-overview-item">
                 <a href="/groups/{group.slug}/gallery/{images.id}">
                     <div class="group-gallery-image-crop" style="background-image: url({images.url})"></div>
-                    <h4 class="group-gallery-overview-caption">{images.caption}</h4>
+                    <h4 class="group-gallery-image-caption">{images.caption}</h4>
                 </a>
-                <div class="group-gallery-overview-details">
-                    <p>Uploaded by <a href="/user/{images.author.userslug}" class="group-gallery-overview-details-author">{images.author.username}</a></p>
-                    <p><span class="group-gallery-overview-details-views">{images.viewcount} Views</span> | <span class="group-gallery-overview-details-comments">{commentcount} Comments</span></p>
+                <div class="group-gallery-image-details">
+                    <p>Uploaded by <a href="/user/{images.author.userslug}" class="group-gallery-image-details-author">{images.author.username}</a></p>
+                    <p><span class="group-gallery-image-details-views">{images.viewcount} Views</span> | <span class="group-gallery-image-details-comments">{images.commentcount} Comments</span></p>
                 </div>
             </div>
             <!-- END images -->

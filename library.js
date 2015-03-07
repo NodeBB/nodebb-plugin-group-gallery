@@ -123,21 +123,47 @@ function renderSingleImage(req, res, next) {
 	if (isNaN(id)) {
 		next(new Error('invalid-image'));
 	} else {
-		async.parallel({
-			image: function(next) {
-				Gallery.getImagesByIds([id], next);
-			},
-			group: function(next) {
-				NodeBB.Groups.getGroupNameByGroupSlug(req.params.name, function(err, groupName) {
-					NodeBB.Groups.get(groupName, {}, next);
-				});
-			}
-		}, function(err, result) {
-			if (err || !result.image.length) {
+		Gallery.getImagesByIds([id], function(err, image) {
+			if (err || !image.length) {
 				next(new Error('invalid-image'));
 			} else {
-				result.image = result.image[0];
-				res.render('group-gallery/single', result);
+				image = image[0];
+
+				async.parallel({
+					nextImages: function(next) {
+						// Get the next 3 images
+						NodeBB.db.getSortedSetRangeByScore(
+							'group-gallery:group:' + req.params.name + ':images',
+							1, 3, image.timestamp, Date.now(),
+							function(err, result) {
+								Gallery.getImagesByIds(result, next);
+							}
+						);
+					},
+					prevId: function(next) {
+						// Get the previous image
+						NodeBB.db.getSortedSetRangeByScore(
+							'group-gallery:group:' + req.params.name + ':images',
+							0, 0, 0, image.timestamp - 1,
+							function(err, result) {
+								next(null, result.length ? parseInt(result[result.length - 1], 10) : null);
+							}
+						);
+					},
+					group: function(next) {
+						NodeBB.Groups.getGroupNameByGroupSlug(req.params.name, function(err, groupName) {
+							NodeBB.Groups.get(groupName, {}, next);
+						});
+					}
+				}, function(err, result) {
+					if (err) {
+						next(new Error('invalid-image'));
+					} else {
+						result.image = image;
+						result.nextId = result.nextImages.length ? result.nextImages[0].id : null;
+						res.render('group-gallery/single', result);
+					}
+				});
 			}
 		});
 	}
