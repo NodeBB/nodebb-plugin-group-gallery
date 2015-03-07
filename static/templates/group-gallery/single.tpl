@@ -4,17 +4,15 @@
 <input type="hidden" template-variable="image_id" value="{image.id}" />
 <input type="hidden" template-variable="image_uid" value="{image.author.uid}" />
 
-<button data-func="group-gallery.upload" class="btn btn-default pull-right" type="button">Upload</button>
-<h1>{group.name} - Photo gallery</h1>
+<h1>{group.name} - Photo gallery <button data-func="group-gallery.upload" class="btn btn-default pull-right" type="button">Upload</button></h1>
 
 <div class="panel panel-default group-gallery-single">
-    <div class="panel-heading">
-        <h3 class="panel-title">Title</h3>
-    </div>
     <div class="panel-body">
         <div class="group-gallery-single-left">
             <div class="group-gallery-single-left-more">
-                More from this user
+                <a href="/groups/{group.slug}/gallery?uid={image.author.uid}">
+                    More from this user
+                </a>
             </div>
             <div class="group-gallery-single-left-thumbs">
                 <!-- IF !nextImages.length -->

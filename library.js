@@ -77,11 +77,16 @@ GroupGallery.groupRename = function(data) {
 };
 
 function renderImages(req, res, next) {
-	var imagesPerPage = 4;
+	var imagesPerPage = 4,
+		uid = req.query.uid && req.query.uid.length ? parseInt(req.query.uid, 10) : 0;
 
 	async.waterfall([
 		function(next) {
-			Gallery.getGroupImageCount(req.params.name, next);
+			if (!isNaN(uid) && uid > 0) {
+				Gallery.getGroupImageCountByUid(req.params.name, uid, next);
+			} else {
+				Gallery.getGroupImageCount(req.params.name, next);
+			}
 		},
 		function(imageCount, next) {
 			var pageCount = Math.max(1, Math.ceil(imageCount / imagesPerPage));
@@ -96,7 +101,11 @@ function renderImages(req, res, next) {
 
 			async.parallel({
 				images: function(next) {
-					Gallery.getImagesByGroupName(req.params.name, start, end, next);
+					if (!isNaN(uid) && uid > 0) {
+						Gallery.getImagesByUid(req.params.name, uid, start, end, next);
+					} else {
+						Gallery.getImagesByGroupName(req.params.name, start, end, next);
+					}
 				},
 				group: function(next) {
 					NodeBB.Groups.getGroupNameByGroupSlug(req.params.name, function(err, groupName) {

@@ -4,13 +4,9 @@
 <input type="hidden" template-variable="currentPage" value="{currentPage}" />
 <input type="hidden" template-variable="pageCount" value="{pageCount}" />
 
-<button data-func="group-gallery.upload" class="btn btn-default pull-right" type="button">Upload</button>
-<h1>{group.name} - Photo gallery</h1>
+<h1>{group.name} - Photo gallery <button data-func="group-gallery.upload" class="btn btn-default pull-right" type="button">Upload</button></h1>
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">Title</h3>
-    </div>
     <div class="panel-body">
         <div class="group-gallery-overview-pagination">
             <!-- IMPORT partials/paginator.tpl -->
