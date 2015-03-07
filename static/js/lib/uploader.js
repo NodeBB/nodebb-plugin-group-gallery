@@ -14,7 +14,7 @@
 					$.fancybox.close();
 				}
 
-				var route = '/groups/' + GroupGallery.vars.groupName + '/images/upload';
+				var route = '/groups/' + GroupGallery.vars.groupName + '/gallery/upload';
 				bootbox.prompt('Image caption', function(caption) {
 					if (caption !== null) {
 						uploaderModule.open(route, {caption: caption}, null, function(image) {});

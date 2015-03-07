@@ -26,7 +26,7 @@ GroupGallery.init = function(params, callback) {
 	router.get('/api/groups/:name/gallery/:image_id', middleware.checkGlobalPrivacySettings,
 		groupExists, increaseViewCount, renderSingleImage);
 
-	router.post('/groups/:name/images/upload', multipartMiddleware, middleware.applyCSRF,
+	router.post('/groups/:name/gallery/upload', multipartMiddleware, middleware.applyCSRF,
 		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
 
 	NodeBB.SocketAdmin[Config.plugin.id] = Config.adminSockets;
