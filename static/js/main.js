@@ -39,10 +39,13 @@
 				return;
 			}
 
-			if (self.vars.page === 'group' && (groupName !== self.vars.groupName || !self.vars.groupImages)) {
+			if (groupName !== self.vars.groupName) {
 				self.vars.groupName = groupName;
-				loadImages();
-				return;
+
+				if (self.vars.page === 'group' || !self.vars.groupImages) {
+					loadImages();
+					return;
+				}
 			}
 
 			self.bindEvents();
@@ -114,10 +117,14 @@
 			GroupGallery.addImages(image);
 			var index = GroupGallery.vars.indexLookup[image[0].id];
 
-			if (parseInt(image[0].uid, 10) === parseInt(app.user.uid, 10)) {
-				GroupGallery.modal.openOnIndex(index);
-			} else if ($.fancybox.current !== null) {
-				$.fancybox.current.group.push(GroupGallery.vars.lightboxImages[index]);
+			if (GroupGallery.vars.page === 'group') {
+				if (parseInt(image[0].uid, 10) === parseInt(app.user.uid, 10)) {
+					GroupGallery.modal.openOnIndex(index);
+				} else if ($.fancybox.current !== null) {
+					$.fancybox.current.group.push(GroupGallery.vars.lightboxImages[index]);
+				}
+			} else {
+				ajaxify.go('groups/' + GroupGallery.vars.groupName + '/gallery/' + image[0].id);
 			}
 		});
 

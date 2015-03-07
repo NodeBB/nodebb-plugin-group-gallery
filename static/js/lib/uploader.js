@@ -6,6 +6,7 @@
 		uploaderModule = null;
 
 	Uploader.open = function() {
+		console.log(GroupGallery.vars);
 		if (GroupGallery.vars.groupName) {
 			if (uploaderModule === null) {
 				loadUploaderModule();
