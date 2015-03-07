@@ -9,7 +9,10 @@
 		}
 	});
 
-	var GroupGallery = {
+	var GroupGallery = {};
+
+	GroupGallery.vars = {
+		page: '',
 		groupName: null,
 		groupImages: null,
 		indexLookup: {},
@@ -29,25 +32,28 @@
 		var self = this;
 
 		function load() {
-			if (!self.lightboxOptions.tpl) {
+			self.vars.page = ajaxify.variables.get('group_gallery_page') || 'group';
+
+			if (self.vars.page === 'group' && !self.vars.lightboxOptions.tpl) {
 				loadTemplate();
 				return;
 			}
 
-			if (groupName !== self.groupName || !self.groupImages) {
-				self.groupName = groupName;
+			if (self.vars.page !== 'overview' && (groupName !== self.vars.groupName || !self.vars.groupImages)) {
+				self.vars.groupName = groupName;
 				loadImages();
 				return;
 			}
 
 			self.bindEvents();
+			self.checkPage();
 
 			if (callback) callback();
 		}
 
 		function loadTemplate() {
 			templates.parse('group-gallery/modal/wrap', {}, function(wrapHtml) {
-				self.lightboxOptions.tpl = {
+				self.vars.lightboxOptions.tpl = {
 					wrap: wrapHtml
 				};
 				load();
@@ -55,18 +61,18 @@
 		}
 
 		function loadImages() {
-			if (!self.groupName) {
-				self.groupImages = [];
+			if (!self.vars.groupName) {
+				self.vars.groupImages = [];
 				return;
 			}
 
 			$.ajax({
-				url: '/api/groups/' + self.groupName + '/images',
+				url: '/api/groups/' + self.vars.groupName + '/gallery',
 				success: function(result) {
 					self.addImages(result.images);
 				},
 				error: function() {
-					self.groupImages = [];
+					self.vars.groupImages = [];
 				},
 				complete: function() {
 					load();
@@ -78,22 +84,22 @@
 	};
 
 	GroupGallery.addImages = function(images) {
-		if (!Array.isArray(this.groupImages)) {
-			this.groupImages = [];
+		if (!Array.isArray(this.vars.groupImages)) {
+			this.vars.groupImages = [];
 		}
 
-		this.groupImages = this.groupImages.concat(images);
+		this.vars.groupImages = this.vars.groupImages.concat(images);
 		this.indexImages();
 	};
 
 	GroupGallery.indexImages = function() {
 		var self = this;
 
-		this.indexLookup = {};
-		this.idLookup = [];
-		this.lightboxImages = this.groupImages.map(function(el, index) {
-			self.indexLookup[el.id] = index;
-			self.idLookup[index] = el.id;
+		this.vars.indexLookup = {};
+		this.vars.idLookup = [];
+		this.vars.lightboxImages = this.vars.groupImages.map(function(el, index) {
+			self.vars.indexLookup[el.id] = index;
+			self.vars.idLookup[index] = el.id;
 			return {
 				href: el.url,
 				title: ''
@@ -106,12 +112,12 @@
 		socket.off(event).on(event, function(image) {
 			// Image is an array of length one
 			GroupGallery.addImages(image);
-			var index = GroupGallery.indexLookup[image[0].id];
+			var index = GroupGallery.vars.indexLookup[image[0].id];
 
 			if (parseInt(image[0].uid, 10) === parseInt(app.uid, 10)) {
 				GroupGallery.modal.openOnIndex(index);
 			} else if ($.fancybox.current !== null) {
-				$.fancybox.current.group.push(GroupGallery.lightboxImages[index]);
+				$.fancybox.current.group.push(GroupGallery.vars.lightboxImages[index]);
 			}
 		});
 
@@ -121,6 +127,12 @@
 			.off(clickEvent, '[data-func="group-gallery.upload"]')
 			.on(clickEvent, '[data-func="group-gallery.modal.open"]', GroupGallery.modal.open)
 			.on(clickEvent, '[data-func="group-gallery.upload"]', GroupGallery.uploader.open);
+	};
+
+	GroupGallery.checkPage = function() {
+		if (this.vars.page && this.vars.page.length && this[this.page]) {
+			this[this.page].init();
+		}
 	};
 
 	window.GroupGallery = GroupGallery;

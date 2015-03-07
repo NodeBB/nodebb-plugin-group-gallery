@@ -14,7 +14,7 @@
 	Modal.open = function(event) {
 		var el = $(event.currentTarget),
 			id = el.data('group-gallery-id'),
-			index = parseInt(GroupGallery.indexLookup[id], 10);
+			index = parseInt(GroupGallery.vars.indexLookup[id], 10);
 
 		Modal.openOnIndex(index);
 
@@ -23,11 +23,11 @@
 	};
 
 	Modal.openOnIndex = function(index) {
-		GroupGallery.lightboxOptions.index = isNaN(index) || index < 0 ? 0 : index;
-		GroupGallery.lightboxOptions.beforeShow = beforeShow;
-		GroupGallery.lightboxOptions.afterShow = afterShow;
-		GroupGallery.lightboxOptions.beforeClose = beforeClose;
-		$.fancybox(GroupGallery.lightboxImages, GroupGallery.lightboxOptions);
+		GroupGallery.vars.lightboxOptions.index = isNaN(index) || index < 0 ? 0 : index;
+		GroupGallery.vars.lightboxOptions.beforeShow = beforeShow;
+		GroupGallery.vars.lightboxOptions.afterShow = afterShow;
+		GroupGallery.vars.lightboxOptions.beforeClose = beforeClose;
+		$.fancybox(GroupGallery.vars.lightboxImages, GroupGallery.vars.lightboxOptions);
 	};
 
 	Modal.clearComments = function() {
@@ -52,7 +52,7 @@
 	}
 
 	function afterShow() {
-		var id = parseInt(GroupGallery.idLookup[this.index], 10);
+		var id = parseInt(GroupGallery.vars.idLookup[this.index], 10);
 		if (!isNaN(id)) {
 			var _setDimension = $.fancybox._setDimension;
 			$.fancybox._setDimension = function() {
@@ -77,7 +77,7 @@
 	}
 
 	function sendComment(comment) {
-		var id = parseInt(GroupGallery.idLookup[this.index], 10);
+		var id = parseInt(GroupGallery.vars.idLookup[this.index], 10);
 		if (!isNaN(id)) {
 			socket.emit('plugins.group-gallery.addComment', {
 				imageId: id,
@@ -176,7 +176,7 @@
 			return false;
 		});
 
-		if (parseInt(GroupGallery.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
+		if (parseInt(GroupGallery.vars.groupImages[this.index].uid, 10) === parseInt(app.uid, 10) || app.isAdmin) {
 			removeImageButton.removeClass('hidden');
 		} else {
 			removeImageButton.addClass('hidden');
@@ -205,11 +205,11 @@
 		});
 
 		socket.on(socketEvents.removeImage, function(imageId) {
-			var index = GroupGallery.indexLookup[parseInt(imageId, 10)];
+			var index = GroupGallery.vars.indexLookup[parseInt(imageId, 10)];
 
 			if (!isNaN(index)) {
 				// Remove image from the image list, reindex them
-				GroupGallery.groupImages.splice(index, 1);
+				GroupGallery.vars.groupImages.splice(index, 1);
 				GroupGallery.indexImages();
 				self.group.splice(index, 1);
 

@@ -1,14 +1,15 @@
 "use strict";
 
-(function(window) {
+(function(GroupGallery) {
 
-	$(window).on('action:ajaxify.end', function(event, data) {
-		var isOverview = ajaxify.variables.get('is_gallery_overview');
-		if (isOverview && isOverview.length) {
-			require(['forum/pagination'], function(pagination) {
-				pagination.init(ajaxify.variables.get('currentPage'), ajaxify.variables.get('pageCount'));
-			});
-		}
-	});
+	var Overview = {};
 
-})(window);
+	Overview.init = function() {
+		require(['forum/pagination'], function(pagination) {
+			pagination.init(ajaxify.variables.get('currentPage'), ajaxify.variables.get('pageCount'));
+		});
+	};
+
+	GroupGallery.overview = Overview;
+
+})(GroupGallery);

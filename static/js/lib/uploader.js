@@ -6,7 +6,7 @@
 		uploaderModule = null;
 
 	Uploader.open = function() {
-		if (GroupGallery.groupName) {
+		if (GroupGallery.vars.groupName) {
 			if (uploaderModule === null) {
 				loadUploaderModule();
 			} else {
@@ -14,7 +14,7 @@
 					$.fancybox.close();
 				}
 
-				var route = '/groups/' + GroupGallery.groupName + '/images/upload';
+				var route = '/groups/' + GroupGallery.vars.groupName + '/images/upload';
 				bootbox.prompt('Image caption', function(caption) {
 					if (caption !== null) {
 						uploaderModule.open(route, {caption: caption}, null, function(image) {});
