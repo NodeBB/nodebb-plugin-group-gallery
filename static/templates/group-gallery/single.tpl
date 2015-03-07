@@ -2,6 +2,7 @@
 <input type="hidden" template-variable="group_slug" value="{group.slug}" />
 <input type="hidden" template-variable="group_gallery_page" value="single" />
 <input type="hidden" template-variable="image_id" value="{image.id}" />
+<input type="hidden" template-variable="image_uid" value="{image.author.uid}" />
 
 <button data-func="group-gallery.upload" class="btn btn-default pull-right" type="button">Upload</button>
 <h1>{group.name} - Photo gallery</h1>
@@ -55,6 +56,9 @@
                     <p>Uploaded by <a href="/user/{image.author.userslug}" class="group-gallery-image-details-author">{image.author.username}</a></p>
                     <p><span class="group-gallery-image-details-views">{image.viewcount} Views</span> | <span class="group-gallery-image-details-comments">{image.commentcount} Comments</span></p>
                 </div>
+            </div>
+            <div class="group-gallery-single-buttons">
+                <button data-func="group-gallery.remove" class="btn btn-danger hidden" type="button">Remove</button>
             </div>
             <hr>
             <h2>Comments</h2>
