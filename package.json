@@ -1,31 +1,34 @@
 {
-  "name": "nodebb-plugin-group-gallery",
-  "version": "0.0.1",
-  "description": "Exposes photo uploading capability for groups, and introduces a custom widget for placement into group pages",
-  "main": "library.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nodebb/nodebb-plugin-group-gallery"
-  },
-  "keywords": [
-    "nodebb",
-    "plugin",
-    "gallery",
-    "photos",
-    "upload"
-  ],
-  "author": {
-    "name": "Erik Schamper",
-    "email": "erikschamper@outlook.com"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nodebb/nodebb-plugin-group-gallery/issues"
-  },
-  "readmeFilename": "README.md",
-  "dependencies": {
-	  "async": "~0.9.0",
-	  "connect-multiparty": "^1.2.4",
-	  "string": "^3.0.0"
-  }
+	"name": "nodebb-plugin-group-gallery",
+	"version": "0.0.1",
+	"description": "Exposes photo uploading capability for groups, and introduces a custom widget for placement into group pages",
+	"main": "library.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nodebb/nodebb-plugin-group-gallery"
+	},
+	"keywords": [
+		"nodebb",
+		"plugin",
+		"gallery",
+		"photos",
+		"upload"
+	],
+	"author": {
+		"name": "Erik Schamper",
+		"email": "erikschamper@outlook.com"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/nodebb/nodebb-plugin-group-gallery/issues"
+	},
+	"readmeFilename": "README.md",
+	"dependencies": {
+		"async": "~0.9.0",
+		"connect-multiparty": "^1.2.4",
+		"string": "^3.0.0"
+	},
+	"nbbpm": {
+		"compatibility": "^0.7.0"
+	}
 }
