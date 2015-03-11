@@ -10,8 +10,8 @@
     <div class="panel-body">
         <div class="group-gallery-single-left">
             <div class="group-gallery-single-left-more">
-                <a href="/groups/{group.slug}/gallery?uid={image.author.uid}">
-                    More from this user
+                <a href="/groups/{group.slug}/gallery">
+                    More from this gallery
                 </a>
             </div>
             <div class="group-gallery-single-left-thumbs">
