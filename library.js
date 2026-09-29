@@ -18,16 +18,16 @@ GroupGallery.init = function(params, callback) {
 		multipartMiddleware = require('connect-multiparty')();
 
 	router.get('/groups/:name/gallery', middleware.checkGlobalPrivacySettings, middleware.buildHeader,
-		groupExists, renderImages);
+		groupChecks, renderImages);
 	router.get('/groups/:name/gallery/:image_id', middleware.checkGlobalPrivacySettings, middleware.buildHeader,
-		groupExists, increaseViewCount, renderSingleImage);
+		groupChecks, increaseViewCount, renderSingleImage);
 	router.get('/api/groups/:name/gallery', middleware.checkGlobalPrivacySettings,
-		groupExists, renderImages);
+		groupChecks, renderImages);
 	router.get('/api/groups/:name/gallery/:image_id', middleware.checkGlobalPrivacySettings,
-		groupExists, increaseViewCount, renderSingleImage);
+		groupChecks, increaseViewCount, renderSingleImage);
 
 	router.post('/groups/:name/gallery/upload', multipartMiddleware, middleware.applyCSRF,
-		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupExists, uploadImage);
+		middleware.authenticate, middleware.checkGlobalPrivacySettings, groupChecks, uploadImage);
 
 	NodeBB.SocketAdmin[Config.plugin.id] = Config.adminSockets;
 	NodeBB.SocketPlugins[Config.plugin.id] = require('./lib/sockets');
@@ -190,37 +190,68 @@ function increaseViewCount(req, res, next) {
 }
 
 function uploadImage(req, res, next) {
-	UploadsController.upload(req, res, function(file, next) {
-		var params = JSON.parse(req.body.params);
-		if (params && params.caption && params.caption.length && NodeBB.Plugins.hasListeners('filter:uploadImage')) {
-			NodeBB.Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
-				if (err) {
-					return next(err);
-				}
-
-				Gallery.addImage({
-					uid: req.user.uid,
-					url: data.url,
-					group: req.params.name,
-					caption: params.caption
-				}, function(err, image) {
-					NodeBB.SocketIndex.server.sockets.emit('event:group-gallery.newImage', image);
-					next(err, data);
-				});
-			});
-		} else {
-			next(new Error('no-upload-plugin'))
+	async.parallel({
+		isAdminOrGlobalMod: function (next) {
+			NodeBB.User.isAdminOrGlobalMod(req.user.uid, next);
+		},
+		isMember: function (next) {
+			NodeBB.Groups.isMember(req.user.uid, req.params.name, next);
 		}
-	}, next);
+	}, function(err, results) {
+		if (err) {
+			return next(err);
+		}
+		if (!results.isAdminOrGlobalMod && !results.isMember) {
+			return next(new Error('[[error:no-privileges]]'));
+		}
+		UploadsController.upload(req, res, function(file, next) {
+			var params = JSON.parse(req.body.params);
+			if (params && params.caption && params.caption.length && NodeBB.Plugins.hasListeners('filter:uploadImage')) {
+				NodeBB.Plugins.fireHook('filter:uploadImage', {image: file, uid: req.user.uid}, function(err, data) {
+					if (err) {
+						return next(err);
+					}
+
+					Gallery.addImage({
+						uid: req.user.uid,
+						url: data.url,
+						group: req.params.name,
+						caption: params.caption
+					}, function(err, image) {
+						NodeBB.SocketIndex.server.sockets.emit('event:group-gallery.newImage', image);
+						next(err, data);
+					});
+				});
+			} else {
+				next(new Error('no-upload-plugin'))
+			}
+		}, next);
+	});
 }
 
-function groupExists(req, res, next) {
-	NodeBB.Groups.exists(req.params.name, function(err, exists) {
-		if (err || !exists) {
-			ControllerHelpers.notFound(req, res);
-		} else {
-			next();
+function groupChecks(req, res, next) {
+	async.parallel({
+		exists: function (next) {
+			NodeBB.Groups.exists(req.params.name, next);
+		},
+		isHidden: function (next) {
+			NodeBB.Groups.isHidden(req.params.name, next);
+		},
+		isAdminOrGlobalMod: function (next) {
+			NodeBB.User.isAdminOrGlobalMod(req.user.uid, next);
+		},
+		isMember: function (next) {
+			NodeBB.Groups.isMember(req.user.uid, req.params.name, next);
 		}
+	}, function (err, results) {
+		if (err) {
+			return next(err);
+		}
+		if (!results.exists || (results.isHidden && !results.isAdminOrGlobalMod && !results.isMember)) {
+			ControllerHelpers.notFound(req, res);
+			return;
+		}
+		next();
 	});
 }
 
